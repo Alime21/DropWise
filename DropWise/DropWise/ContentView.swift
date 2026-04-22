@@ -9,11 +9,10 @@ struct ContentView: View {
                     Label("Özet", systemImage: "drop.fill")
                 }
             
-            // 2. Tarlalarım (Şimdilik Boş Yer Tutucu)
-            Text("Tarlalarım Ekranı Yapım Aşamasında...")
-                .tabItem {
-                    Label("Tarlalar", systemImage: "leaf.fill")
-                }
+            // 2. Ekran (Yeni Eklediğimiz!)
+            FieldsView()
+                .tabItem { Label("Tarlalar", systemImage: "leaf.fill") }
+            
             
             // 3. NLP Sesli Asistan
             Text("Akıllı Asistan Yapım Aşamasında...")
