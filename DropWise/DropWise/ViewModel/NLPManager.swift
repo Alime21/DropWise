@@ -1,52 +1,45 @@
 import Foundation
 
-// NLP'nin analiz sonucunu tutacak yapı
-struct NLPResult {
-    let intent: String      // Niyet (Örn: "Tavsiye", "Bilgi")
-    let targetField: String // Hedef Tarla
-    let recommendation: String // Yapay Zeka Cevabı
-}
-
 class NLPManager {
     static let shared = NLPManager()
     
-    // Basit bir Kural Tabanlı (Rule-based) NLP Simülasyonu
-    func analyzeFarmerInput(_ text: String) -> NLPResult {
-        let lowercasedText = text.lowercased()
+    // ADIM 1: Analiz Kısmı (İsimleri düzelttik)
+    func analyzeFarmerInput(_ text: String) -> String {
+        let input = text.lowercased()
         
-        // 1. Entity Extraction (Varlık Çıkarımı) - Hangi tarla?
-        var detectedField = "Genel"
-        if lowercasedText.contains("kuzey") || lowercasedText.contains("tepe") {
-            detectedField = "Kuzey Tarlası"
-        } else if lowercasedText.contains("yol") {
-            detectedField = "Yol Kenarı"
+        // Daha hassas eşleşme yapıyoruz
+        if input.contains("kuzey") {
+            return "Kuzey Tarlası"
+        } else if input.contains("yol") || input.contains("kenar") {
+            return "Yol Kenarı"
+        } else if input.contains("tepe") {
+            return "Tepe Mevkii"
         }
         
-        // 2. Intent Classification (Niyet Sınıflandırması) - Ne istiyor?
-        if lowercasedText.contains("ne ekmeliyim") || lowercasedText.contains("tavsiye") || lowercasedText.contains("öneri") {
+        return "Genel" // Hiçbiri eşleşmezse
+    }
+    
+    // ADIM 2: Üretim Kısmı (Eşleşmeyi garantiye aldık)
+    func generateSmartResponse(for fieldName: String) -> String {
+        // Büyük/küçük harf fark etmeksizin listeyi tara
+        let field = MockProvider.shared.fields.first {
+            $0.name.lowercased() == fieldName.lowercased()
+        } ?? MockProvider.shared.fields[0] // Bulamazsa yine 0'a döner, ama artık bulacak!
+        
+        let waterLimit = 1000.0
+        
+        let greeting = ["Harika!", "Hemen analiz ediyorum:", "İşte sonuçlar:"].randomElement()!
+        
+        // Su Tüketimi Analizi
+        let analysis = field.waterConsumption > waterLimit ?
+            "\(field.name) tarlanızda su tüketimi \(Int(field.waterConsumption))L ile kotayı zorluyor." :
+            "\(field.name) tarlanızda su kullanımı oldukça verimli (\(Int(field.waterConsumption))L)."
+        
+        // Sağlık Durumu Tavsiyesi
+        let recommendation = field.healthStatus == "Kritik" ?
+            "Acilen damla sulama sistemine geçmenizi öneririm." :
+            "Mevcut durum stabil, sulama periyoduna devam edebilirsiniz."
             
-            return NLPResult(
-                intent: "Tavsiye İstemi",
-                targetField: detectedField,
-                recommendation: "Bölgenizdeki kuraklık riski nedeniyle bu sezon su tüketimi düşük olan Arpa ekmeniz %45 su tasarrufu sağlayacaktır."
-            )
-            
-        } else if lowercasedText.contains("su") || lowercasedText.contains("kredi") {
-            
-            return NLPResult(
-                intent: "Su Durumu Sorgusu",
-                targetField: detectedField,
-                recommendation: "Mevcut su krediniz kritik seviyede. Lütfen sulama sistemlerinizi gece saatlerine göre optimize edin."
-            )
-            
-        } else {
-            // Anlaşılamayan durumlar için Fallback (Güvenlik ağı)
-            return NLPResult(
-                intent: "Genel Analiz",
-                targetField: "Tüm Tarlalar",
-                recommendation: "Tarlalarınızın genel sağlık durumu iyi. Düzenli sulama planınıza devam edebilirsiniz."
-            )
-        }
+        return "\(greeting) \(analysis) \(recommendation)"
     }
 }
-

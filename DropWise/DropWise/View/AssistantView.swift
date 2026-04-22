@@ -2,16 +2,16 @@ import SwiftUI
 
 struct AssistantView: View {
     @State private var isPulsing = false
-    @State private var farmerInput = ""
-    @State private var showResult = false
-    @State private var nlpResult: NLPResult?
+    @State private var farmerInput = "" // Çiftçinin yazdığı/söylediği metin
+    @State private var showResult = false // Sonuç ekranını açma kontrolü
+    @State private var smartSpeech = "" // NLG tarafından üretilen cümle
     
     var body: some View {
         NavigationView {
             VStack(spacing: 40) {
                 Spacer()
                 
-                // Dinamik Mikrofon İkonu
+                // Animasyonlu Mikrofon
                 ZStack {
                     Circle()
                         .fill(Color.blue.opacity(0.2))
@@ -32,26 +32,32 @@ struct AssistantView: View {
                 
                 VStack(spacing: 15) {
                     Text("Sizi Dinliyorum...")
-                        .font(.title)
-                        .bold()
+                        .font(.title).bold()
                     
-                    // Jürinin önünde şov yapacağımız sahte giriş alanı (Gerçekte sesle dolacak)
-                    TextField("Örn: Kuzey tarlasına ne ekmeliyim?", text: $farmerInput)
+                    TextField("Örn: Kuzey tarlasında ne ekili?", text: $farmerInput)
                         .textFieldStyle(RoundedBorderTextFieldStyle())
                         .padding(.horizontal, 30)
                 }
                 
                 Spacer()
                 
-                // Analiz Butonu
+                // ANALİZ VE ÜRETİM BUTONU
                 Button(action: {
-                    // NLP Motorunu Çalıştır
-                    nlpResult = NLPManager.shared.analyzeFarmerInput(farmerInput)
-                    showResult = true
+                    // --- ADIM 1: NLP (Metni Anla) ---
+                    // Burada 'result' değişkenini tanımlıyoruz
+                    let detectedName = NLPManager.shared.analyzeFarmerInput(farmerInput)
+                    
+                    // --- ADIM 2: NLG (Cümle Üret) ---
+                    // Az önce tanımladığımız 'analysisResult' içindeki veriyi kullanıyoruz
+                    let finalSpeech = NLPManager.shared.generateSmartResponse(for: detectedName)
+                        
+                    // --- ADIM 3: STATE GÜNCELLE ---
+                    self.smartSpeech = finalSpeech
+                    self.showResult = true
                 }) {
                     HStack {
                         Image(systemName: "cpu")
-                        Text("Söylemi Analiz Et (NLP)")
+                        Text("Akıllı Analizi Başlat")
                     }
                     .font(.headline)
                     .foregroundColor(.white)
@@ -64,9 +70,9 @@ struct AssistantView: View {
                 .disabled(farmerInput.isEmpty)
                 .padding(.bottom, 20)
                 
-                // Gizli Yönlendirme (NavigationLink)
+                // SONUÇ EKRANINA YÖNLENDİRME
                 NavigationLink(
-                    destination: Text(nlpResult?.recommendation ?? "Hata").padding(), // Şimdilik basit text, sonra o havalı sayfaya bağlarız
+                    destination: ResultDetailView(message: smartSpeech),
                     isActive: $showResult,
                     label: { EmptyView() }
                 )
@@ -76,6 +82,22 @@ struct AssistantView: View {
     }
 }
 
-#Preview {
-    AssistantView()
+// Sonucu gösteren basit bir alt görünüm
+struct ResultDetailView: View {
+    let message: String
+    var body: some View {
+        VStack(spacing: 20) {
+            Image(systemName: "sparkles")
+                .font(.system(size: 60))
+                .foregroundColor(.orange)
+            
+            Text(message)
+                .font(.title3)
+                .multilineTextAlignment(.center)
+                .padding()
+            
+            Spacer()
+        }
+        .navigationTitle("YZ Analiz Sonucu")
+    }
 }
