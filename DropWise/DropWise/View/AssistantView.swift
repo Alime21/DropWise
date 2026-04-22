@@ -2,6 +2,9 @@ import SwiftUI
 
 struct AssistantView: View {
     @State private var isPulsing = false
+    @State private var farmerInput = ""
+    @State private var showResult = false
+    @State private var nlpResult: NLPResult?
     
     var body: some View {
         NavigationView {
@@ -25,39 +28,48 @@ struct AssistantView: View {
                         .frame(width: 50, height: 50)
                         .foregroundColor(.white)
                 }
-                .onAppear {
-                    isPulsing = true
-                }
+                .onAppear { isPulsing = true }
                 
-                VStack(spacing: 10) {
+                VStack(spacing: 15) {
                     Text("Sizi Dinliyorum...")
                         .font(.title)
                         .bold()
                     
-                    Text("Hangi tarlanız için optimizasyon yapmak istersiniz?")
-                        .font(.body)
-                        .foregroundColor(.secondary)
-                        .multilineTextAlignment(.center)
+                    // Jürinin önünde şov yapacağımız sahte giriş alanı (Gerçekte sesle dolacak)
+                    TextField("Örn: Kuzey tarlasına ne ekmeliyim?", text: $farmerInput)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
                         .padding(.horizontal, 30)
                 }
                 
                 Spacer()
                 
-                // Simülasyon Butonu (Sonuç ekranına bağlar)
-                NavigationLink(destination: OptimizationResultView()) {
+                // Analiz Butonu
+                Button(action: {
+                    // NLP Motorunu Çalıştır
+                    nlpResult = NLPManager.shared.analyzeFarmerInput(farmerInput)
+                    showResult = true
+                }) {
                     HStack {
                         Image(systemName: "cpu")
-                        Text("Yapay Zeka Analizini Başlat")
+                        Text("Söylemi Analiz Et (NLP)")
                     }
                     .font(.headline)
                     .foregroundColor(.white)
                     .frame(maxWidth: .infinity)
                     .padding()
-                    .background(Color.blue)
+                    .background(farmerInput.isEmpty ? Color.gray : Color.blue)
                     .cornerRadius(15)
                     .padding(.horizontal, 20)
                 }
+                .disabled(farmerInput.isEmpty)
                 .padding(.bottom, 20)
+                
+                // Gizli Yönlendirme (NavigationLink)
+                NavigationLink(
+                    destination: Text(nlpResult?.recommendation ?? "Hata").padding(), // Şimdilik basit text, sonra o havalı sayfaya bağlarız
+                    isActive: $showResult,
+                    label: { EmptyView() }
+                )
             }
             .navigationTitle("DropWise Asistan")
         }
