@@ -9,19 +9,16 @@ struct ContentView: View {
                     Label("Özet", systemImage: "drop.fill")
                 }
             
-            // 2. Ekran (Yeni Eklediğimiz!)
+            // 2. Tarlalar Ekranı
             FieldsView()
                 .tabItem { Label("Tarlalar", systemImage: "leaf.fill") }
             
+            // 3. Asistan Ekrani
+            AssistantView()
+                .tabItem { Label("Asistan", systemImage: "mic.fill") }
             
-            // 3. NLP Sesli Asistan
-            Text("Akıllı Asistan Yapım Aşamasında...")
-                .tabItem {
-                    Label("Asistan", systemImage: "waveform.circle.fill")
-                }
-            
-            // 4. Kuantum Optimizasyon Sonuçları
-            Text("Optimizasyon Paneli...")
+            // 4. Analiz Ekranı (Kuantum Optimizasyon Sonuçları)
+            OptimizationResultView()
                 .tabItem {
                     Label("Analiz", systemImage: "chart.xyaxis.line")
                 }
