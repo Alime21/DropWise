@@ -2,6 +2,7 @@ import SwiftUI
 
 struct AssistantView: View {
     // --- MARK: - Properties (State)
+    @StateObject var speechManager = SpeechManager()
     @State private var isPulsing = false
     @State private var farmerInput = ""
     @State private var showResult = false
@@ -39,25 +40,44 @@ private extension AssistantView {
     // Mikrofon ve Progress Kısmı
     var micSection: some View {
         ZStack {
+            // 1. ANİMASYONLU DIŞ HALKA
             Circle()
                 .fill(isCalculating ? Color.orange.opacity(0.2) : Color.blue.opacity(0.2))
-                .frame(width: isPulsing ? 200 : 150, height: isPulsing ? 200 : 150)
-                .animation(.easeInOut(duration: 1.2).repeatForever(autoreverses: true), value: isPulsing)
+                            // BURASI: isRecording true ise halka 200'e büyür, false ise 150'de kalır
+                            .frame(width: speechManager.isRecording ? 200 : 150,
+                                   height: speechManager.isRecording ? 200 : 150)
+                            // BURASI: Ses kaydı varken sürekli büyüyüp küçülme (pulse) efekti verir
+                            .animation(speechManager.isRecording ? .easeInOut(duration: 0.5).repeatForever(autoreverses: true) : .default, value: speechManager.isRecording)
             
+            // 2. SABİT İÇ HALKA
             Circle()
                 .fill(isCalculating ? Color.orange.opacity(0.4) : Color.blue.opacity(0.4))
                 .frame(width: 120, height: 120)
             
+            // 3. MİKROFON BUTONU VEYA YÜKLENİYOR SİMGESİ
             if isCalculating {
                 ProgressView()
                     .progressViewStyle(CircularProgressViewStyle(tint: .white))
                     .scaleEffect(2)
             } else {
-                Image(systemName: "mic.fill")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 50, height: 50)
-                    .foregroundColor(.white)
+                Button(action: {
+                    if speechManager.isRecording {
+                        speechManager.stopRecording()
+                        // Kayıt durduğunda TextField'ı doldur ve analizi başlat
+                        self.farmerInput = speechManager.transcribedText
+                        startAnalysis()
+                    } else {
+                        speechManager.startRecording { finalResult in
+                            self.farmerInput = finalResult
+                        }
+                    }
+                }) {
+                    Image(systemName: speechManager.isRecording ? "stop.fill" : "mic.fill")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 50, height: 50)
+                        .foregroundColor(.white)
+                }
             }
         }
     }
