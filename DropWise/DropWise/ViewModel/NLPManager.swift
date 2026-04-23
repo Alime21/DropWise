@@ -28,31 +28,62 @@ class NLPManager {
             return "Tepe Mevkii"
         }
         
+        // 2. Aksiyon ve Risk Bazlı Analiz (Yeni!)
+        if input.contains("yağmur") || input.contains("hava") {
+                return "Hava Durumu Analizi" // Buna göre özel bir cevap dönebilirsin
+            }
+        if input.contains("fatura") || input.contains("maliyet") || input.contains("para") {
+                return "Finansal Analiz"
+            }
+        if input.contains("vakit") || input.contains("saat") || input.contains("ne zaman") {
+                return "Zamanlama Tavsiyesi"
+            }
+            if input.contains("kapat") || input.contains("durdur") {
+                return "Acil Durdurma"
+            }
+        
         return "Genel" // Hiçbiri eşleşmezse
     }
     
     // ADIM 2: Üretim Kısmı (Eşleşmeyi garantiye aldık)
-    func generateSmartResponse(for fieldName: String) -> String {
-        // Büyük/küçük harf fark etmeksizin listeyi tara
-        let field = MockProvider.shared.fields.first {
-            $0.name.lowercased() == fieldName.lowercased()
-        } ?? MockProvider.shared.fields[0] // Bulamazsa yine 0'a döner, ama artık bulacak!
+    func generateSmartResponse(for inputCategory: String) -> String {
         
-        let waterLimit = 1000.0
-        
-        let greeting = ["Harika!", "Hemen analiz ediyorum:", "İşte sonuçlar:"].randomElement()!
-        
-        // Su Tüketimi Analizi
-        let analysis = field.waterConsumption > waterLimit ?
-            "\(field.name) tarlanızda su tüketimi \(Int(field.waterConsumption))L ile kotayı zorluyor." :
-            "\(field.name) tarlanızda su kullanımı oldukça verimli (\(Int(field.waterConsumption))L)."
-        
-        // Sağlık Durumu Tavsiyesi
-        let recommendation = field.healthStatus == "Kritik" ?
-            "Acilen damla sulama sistemine geçmenizi öneririm." :
-            "Mevcut durum stabil, sulama periyoduna devam edebilirsiniz."
+        // 1. HAZIRLIK: Büyük/küçük harf hatasını önlemek için girdiyi küçük harfe çekiyoruz
+            let category = inputCategory.lowercased()
+            let greeting = ["Harika!", "Hemen analiz ediyorum:", "İşte sonuçlar:"].randomElement()!
             
-        return "\(greeting) \(analysis) \(recommendation)"
+            // 2. ÖZEL DURUM ANALİZİ (Uç Durumlar - Edge Cases)
+            // Eğer kullanıcı tarla adı yerine genel bir şey sorduysa burası çalışır
+            if category.contains("hava") || category.contains("yağmur") {
+                return "☁️ \(greeting) Önümüzdeki saatlerde yağış bekleniyor. Su kredinizi korumak için sistemi 'Bekleme' moduna alabiliriz."
+            }
+            else if category.contains("finans") || category.contains("fatura") || category.contains("maliyet") {
+                return "💰 \(greeting) Bu ayki Kuantum Optimizasyonu sayesinde su maliyetinizde %15 tasarruf sağlandı."
+            }
+            else if category.contains("acil") || category.contains("kapat") {
+                return "⚠️ DİKKAT: Tüm su vanaları güvenlik protokolü gereği kapatıldı. Akış kesildi."
+            }
+
+            // 3. TARLA VERİSİ ANALİZİ (Senin "Adım 2" Kodun - Geliştirilmiş)
+            // Büyük/küçük harf fark etmeksizin listeyi tara
+            let field = MockProvider.shared.fields.first {
+                $0.name.lowercased() == category.lowercased()
+            } ?? MockProvider.shared.fields[0] // Eşleşme yoksa ilk tarlayı baz al
+            
+            let waterLimit = 1000.0
+            
+            // Su Tüketimi Analizi (Gerçek Mock Verisi)
+            let analysis = field.waterConsumption > waterLimit ?
+                "\(field.name) tarlanızda su tüketimi \(Int(field.waterConsumption))L ile kotayı zorluyor." :
+                "\(field.name) tarlanızda su kullanımı oldukça verimli (\(Int(field.waterConsumption))L)."
+            
+            // Sağlık Durumu Tavsiyesi
+            let recommendation = field.healthStatus == "Kritik" ?
+                "Acilen damla sulama sistemine geçmenizi öneririm." :
+                "Mevcut durum stabil, sulama periyoduna devam edebilirsiniz."
+                    
+            // Sonuç çıktısı
+            return "🤖 [Azure AI Analizi]\n\(greeting) \(analysis) \(recommendation)"
     }
     
     // Bu fonksiyonu "Gelecek Vizyonu" veya "Derin Analiz" butonu için
