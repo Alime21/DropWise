@@ -7,7 +7,9 @@
 ---
 
 ## 📺 Demo Videosu
-> [DropWise_Demo_v1.mov.zip](https://github.com/user-attachments/files/27006526/DropWise_Demo_v1.mov.zip)
+> https://github.com/user-attachments/assets/71a3ce98-433e-4332-af93-90df78a48380
+
+
 
 ---
 
